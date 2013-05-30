@@ -4,9 +4,10 @@
 import copy
 import time
 import os
+from random import randint
 
 debug = 0
-interval = .05
+interval =  0
 generations = 109999
 columns, rows = os.popen('stty size', 'r').read().split()
 xdimension = int(rows)/2
@@ -26,7 +27,6 @@ ca = list(range(xdimension))
 for x in range(xdimension):
     ca[x] = list(range(ydimension))
     for y in range(ydimension):
-        print "x:%s y:%s" % (x,y)
         ca[x][y] = DEAD
 
 # slider from the top left
@@ -67,10 +67,18 @@ def print_playfield(matrix):
 def generate(matrix):
 
     nextgen = copy.deepcopy(matrix)
+    living = 0
 
     for col in range(len(matrix)):
         for row in range(len(matrix[col])):
-            nextgen[col][row] = death_panel(matrix, col, row)
+            next_status = death_panel(matrix, col, row)
+            if next_status == ALIVE:
+                living += 1
+            nextgen[col][row] = next_status
+
+    if living == 0:
+        fill_random(nextgen)
+
     return nextgen
 
 def death_panel(matrix, x, y):
@@ -112,6 +120,13 @@ def death_panel(matrix, x, y):
             print "CHANGE: %s,%s -- neighbors:%s  %s -> %s" % (x, y, neighbor_count, matrix[x][y], prognosis)
 
     return prognosis
+
+def fill_random(matrix):
+    
+    for col in range(len(matrix)):
+        for row in range(len(matrix[col])):
+            matrix[col][row] = ALIVE if randint(0,1) else DEAD
+    return matrix
 
 gen=0
 while (gen < generations):
